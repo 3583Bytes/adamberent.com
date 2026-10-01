@@ -29,6 +29,8 @@ const ALIASES: Record<string, LinkId> = {
   CHESS: 'chess',
   CHESSBIN: 'chess',
   GITHUB: 'github',
+  ARCADE: 'basic',
+  ARCADEBASIC: 'basic',
   STRAVA: 'strava',
   DISCORD: 'discord',
 }

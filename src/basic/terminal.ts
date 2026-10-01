@@ -18,6 +18,9 @@ const HELP = [
   '10 PRINT "HI"    ADD OR REPLACE A NUMBERED LINE',
   'PRINT 6*7        ANYTHING ELSE RUNS RIGHT AWAY',
   'PASTING A PROGRAM WORKS TOO.',
+  '',
+  'ARCADE BASIC IS OPEN SOURCE:',
+  'GITHUB.COM/3583BYTES/ARCADE-BASIC',
 ]
 
 type Mode = 'off' | 'boot' | 'idle' | 'running' | 'input'

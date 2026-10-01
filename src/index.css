@@ -243,6 +243,19 @@ body.computer-on .console-hint {
   font-weight: normal;
 }
 
+.computer-link {
+  color: var(--cream);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.computer-link:hover,
+.computer-link:focus-visible {
+  color: var(--accent);
+  border-color: var(--accent);
+  outline: none;
+}
+
 .computer-off {
   display: flex;
   align-items: center;

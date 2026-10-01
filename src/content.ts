@@ -7,7 +7,7 @@ export const site = {
   intro: 'git commit -m "fix: homepage was boring"',
 }
 
-export type LinkId = 'games' | 'chess' | 'linkedin' | 'github' | 'strava' | 'discord'
+export type LinkId = 'games' | 'chess' | 'linkedin' | 'github' | 'basic' | 'strava' | 'discord'
 
 export const links: Record<LinkId, { label: string; url: string; blurb: string }> = {
   games: {
@@ -29,6 +29,11 @@ export const links: Record<LinkId, { label: string; url: string; blurb: string }
     label: 'GitHub',
     url: 'https://github.com/3583Bytes/',
     blurb: 'Source code, on a floppy. Open-source projects from 3583 Bytes.',
+  },
+  basic: {
+    label: 'Arcade BASIC',
+    url: 'https://github.com/3583Bytes/Arcade-BASIC',
+    blurb: 'The Full BASIC interpreter running on the VIC-20. Open source, written in C#.',
   },
   strava: {
     label: 'Strava',

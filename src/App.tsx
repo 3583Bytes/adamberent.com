@@ -81,6 +81,9 @@ function ComputerBar() {
         Try <b>LOAD "SNAKE"</b> then <b>RUN</b>. Type <b>HELP</b> for more.
         <span className="computer-rotate"> Turn your phone sideways for a bigger screen.</span>
       </span>
+      <a className="computer-link" href={links.basic.url} target="_blank" rel="noopener" tabIndex={computerOn ? 0 : -1}>
+        Powered by Arcade BASIC <span aria-hidden="true">↗</span>
+      </a>
       <button className="computer-off" onClick={() => powerOffComputer()} tabIndex={computerOn ? 0 : -1}>
         <span className="kbd">esc</span> power off
       </button>

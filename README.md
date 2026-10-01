@@ -16,6 +16,7 @@ react-three-fiber. Every object is made in code (no 3D model files).
 Clicking the VIC-20 zooms into the CRT and boots [Arcade BASIC](https://github.com/3583Bytes/Arcade-BASIC),
 a Full BASIC interpreter written in C#, compiled to WebAssembly and run in a Web Worker.
 `LOAD "SNAKE"` then `RUN`; `DIR` lists the bundled programs and `HELP` lists commands.
+While it's on, the bar under the screen links to the Arcade BASIC repo.
 
 - `basic/` is the C# host that wires the interpreter to the page (text, `INPUT`, `INKEY$`,
   graphics, sound). `src/basic/` is the browser side: worker, terminal and line editor.
