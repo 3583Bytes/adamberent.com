@@ -3,13 +3,28 @@
 A single-page personal site: an interactive retro desk built with React, TypeScript and
 react-three-fiber. Every object is made in code (no 3D model files).
 
-- **VIC-20 + CRT** → 3583 Bytes
+- **VIC-20 + CRT** → powers on into a working BASIC computer (see below)
 - **Cartridge shelf** → individual games
 - **Chessboard** → ChessBin
 - **Rolodex** and **Polaroid** → LinkedIn
 - **Floppy disk** → GitHub
 - **iPod** → Strava
 - Press **`** for the dev console (`help` lists commands).
+
+## The BASIC computer
+
+Clicking the VIC-20 zooms into the CRT and boots [Arcade BASIC](https://github.com/3583Bytes/Arcade-BASIC),
+a Full BASIC interpreter written in C#, compiled to WebAssembly and run in a Web Worker.
+`LOAD "SNAKE"` then `RUN`; `DIR` lists the bundled programs and `HELP` lists commands.
+
+- `basic/` is the C# host that wires the interpreter to the page (text, `INPUT`, `INKEY$`,
+  graphics, sound). `src/basic/` is the browser side: worker, terminal and line editor.
+- `scripts/build-basic.sh` clones Arcade BASIC at a pinned commit (`ARCADE_REF`), publishes
+  the WebAssembly bundle (~1.9 MB gzipped) to `public/basic/` and copies the example programs.
+  It needs the .NET 10 SDK. Bump `ARCADE_REF` to pick up interpreter changes.
+- Running programs read keys through `SharedArrayBuffer`, which requires cross-origin
+  isolation. GitHub Pages can't send those headers, so `public/sw.js` adds them; the first
+  time someone powers on, the page reloads once to let the service worker take over.
 
 ## Editing content
 
@@ -18,9 +33,10 @@ All copy and links live in [`src/content.ts`](src/content.ts).
 ## Development
 
 ```sh
-nvm use        # Node 24
+nvm use               # Node 24
 npm install
-npm run dev    # http://localhost:5173
+npm run build:basic   # once, and after bumping ARCADE_REF (needs the .NET 10 SDK)
+npm run dev           # http://localhost:5173
 npm run build  # outputs to dist/
 ```
 

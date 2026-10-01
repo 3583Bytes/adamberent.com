@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { links, site, type LinkId } from './content'
+import { powerOnComputer } from './basic/session'
 import { getState, setState, useStore } from './store'
 
 const BANNER = ['**** ADAM BERENT DEV CONSOLE V2 ****', '3583 BYTES FREE', '', 'TYPE HELP FOR COMMANDS.', '', 'READY.']
@@ -11,6 +12,7 @@ const HELP = [
   '  WIREFRAME    TOGGLE WIREFRAME',
   '  INSPECT      CLICK OBJECTS TO INSPECT',
   '  SPIN         GIVE THE DESK A SPIN',
+  '  BASIC        POWER ON THE VIC-20',
   '  DIR          LIST LINKS',
   '  OPEN <NAME>  OPEN A LINK',
   '  WHOAMI       ABOUT ME',
@@ -130,6 +132,9 @@ function run(raw: string): Result {
       const m = raw.match(/print\s*"([^"]*)"?/i)
       return [m ? m[1].toUpperCase() : '', 'READY.']
     }
+    case 'BASIC':
+      powerOnComputer()
+      return ['POWERING ON...', 'READY.']
     case 'SUDO':
       return ['?NICE TRY  ERROR', 'READY.']
     case 'HIRE':

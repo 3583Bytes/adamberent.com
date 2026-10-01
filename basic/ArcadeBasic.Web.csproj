@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
+  <!-- Browser host for Arcade BASIC (https://github.com/3583Bytes/Arcade-BASIC).
+       scripts/build-basic.sh clones the interpreter into .arcade-basic/ and publishes this. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- JSImport/JSExport only exist in the browser, which is the only target. -->
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
+    <ArcadeBasicSrc Condition="'$(ArcadeBasicSrc)' == ''">$(MSBuildThisFileDirectory)../.arcade-basic</ArcadeBasicSrc>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(ArcadeBasicSrc)/src/ArcadeBasic.Interpreter/ArcadeBasic.Interpreter.csproj" />
+  </ItemGroup>
+</Project>

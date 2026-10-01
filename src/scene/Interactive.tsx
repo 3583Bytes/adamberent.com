@@ -7,7 +7,9 @@ type Props = {
   name: string
   title: string
   blurb: string
-  url: string
+  url?: string
+  // Runs instead of opening url when clicked.
+  onActivate?: () => void
   position?: [number, number, number]
   rotation?: [number, number, number]
   lift?: number
@@ -32,7 +34,7 @@ function countTriangles(root: THREE.Object3D) {
 
 // Wraps a scene object: lifts on hover, shows a tooltip, opens its link on click,
 // and in the console's inspect mode reports stats instead of navigating.
-export function Interactive({ name, title, blurb, url, position, rotation, lift = 0.08, onHoverChange, children }: Props) {
+export function Interactive({ name, title, blurb, url, onActivate, position, rotation, lift = 0.08, onHoverChange, children }: Props) {
   const inner = useRef<THREE.Group>(null)
   const [hot, setHot] = useState(false)
   const [box, setBox] = useState<{ size: THREE.Vector3; center: THREE.Vector3 } | null>(null)
@@ -45,6 +47,8 @@ export function Interactive({ name, title, blurb, url, position, rotation, lift 
   })
 
   const hover = (on: boolean) => {
+    // The desk is out of play while the computer is on.
+    if (on && getState().computerOn) return
     setHot(on)
     onHoverChange?.(on)
     document.body.style.cursor = on ? 'pointer' : ''
@@ -57,7 +61,8 @@ export function Interactive({ name, title, blurb, url, position, rotation, lift 
     // Ignore clicks that were really a drag to look around.
     if (e.delta > 8) return
     if (!getState().inspectMode) {
-      window.open(url, '_blank', 'noopener')
+      if (onActivate) onActivate()
+      else if (url && !getState().computerOn) window.open(url, '_blank', 'noopener')
       return
     }
     const group = inner.current!

@@ -1,4 +1,6 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState, type FormEvent } from 'react'
+import { focusKeyboard, powerOffComputer, powerOnComputer, registerServiceWorker, setKeyboardInput, takeAutostart } from './basic/session'
+import { getTerminal } from './basic/terminal'
 import { links, menu, site } from './content'
 import { DevConsole } from './DevConsole'
 import { getState, setState, useStore } from './store'
@@ -27,19 +29,61 @@ function useFontsReady() {
 function Tooltip() {
   const hovered = useStore((s) => s.hovered)
   const inspectMode = useStore((s) => s.inspectMode)
+  const computerOn = useStore((s) => s.computerOn)
   const [pos, setPos] = useState({ x: 0, y: 0 })
   useEffect(() => {
     const move = (e: PointerEvent) => setPos({ x: e.clientX, y: e.clientY })
     window.addEventListener('pointermove', move)
     return () => window.removeEventListener('pointermove', move)
   }, [])
-  if (!hovered) return null
+  if (!hovered || computerOn) return null
   const flip = pos.x > window.innerWidth - 300
   return (
     <div className="tooltip" style={{ left: pos.x, top: pos.y, transform: `translate(${flip ? 'calc(-100% - 18px)' : '18px'}, 18px)` }}>
       <div className="tooltip-title">{hovered.title}</div>
       <div className="tooltip-blurb">{hovered.blurb}</div>
-      <div className="tooltip-action">{inspectMode ? 'CLICK TO INSPECT' : 'CLICK TO OPEN ↗'}</div>
+      <div className="tooltip-action">{inspectMode ? 'CLICK TO INSPECT' : hovered.url ? 'CLICK TO OPEN ↗' : 'CLICK TO POWER ON'}</div>
+    </div>
+  )
+}
+
+// Shown while zoomed in on the computer, with a hidden input that brings up the
+// on-screen keyboard on touch devices.
+function ComputerBar() {
+  const computerOn = useStore((s) => s.computerOn)
+
+  // Virtual keyboards often report keys only through input events.
+  const onInput = (e: FormEvent<HTMLInputElement>) => {
+    const native = e.nativeEvent as InputEvent
+    const terminal = getTerminal()
+    if (native.inputType === 'deleteContentBackward') {
+      terminal.key(new KeyboardEvent('keydown', { key: 'Backspace' }))
+    } else if (native.data) {
+      for (const ch of native.data) terminal.key(new KeyboardEvent('keydown', { key: ch }))
+    }
+    e.currentTarget.value = ''
+  }
+
+  return (
+    <div className={`computer-bar ${computerOn ? 'is-on' : ''}`} aria-hidden={!computerOn}>
+      <input
+        ref={setKeyboardInput}
+        className="computer-input"
+        aria-label="Type into the computer"
+        autoCapitalize="characters"
+        autoComplete="off"
+        autoCorrect="off"
+        spellCheck={false}
+        tabIndex={-1}
+        onInput={onInput}
+      />
+      <span className="computer-hint">
+        Try <b>LOAD "SNAKE"</b> then <b>RUN</b>. Type <b>HELP</b> for more.
+        <span className="computer-rotate"> Turn your phone sideways for a bigger screen.</span>
+      </span>
+      <button className="computer-off" onClick={() => powerOffComputer()} tabIndex={computerOn ? 0 : -1}>
+        <span className="kbd">esc</span> power off
+      </button>
     </div>
   )
 }
@@ -66,19 +110,44 @@ export default function App() {
   const [touch] = useState(() => window.matchMedia('(pointer: coarse)').matches)
   const fontsReady = useFontsReady()
   const consoleOpen = useStore((s) => s.consoleOpen)
+  const computerOn = useStore((s) => s.computerOn)
 
   useEffect(() => {
+    registerServiceWorker()
     const onKey = (e: KeyboardEvent) => {
       if (e.key === '`' || e.key === '~') {
         e.preventDefault()
         setState({ consoleOpen: !getState().consoleOpen })
       } else if (e.key === 'Escape' && getState().consoleOpen) {
         setState({ consoleOpen: false })
+      } else if (getState().computerOn && !getState().consoleOpen && getTerminal().key(e)) {
+        e.preventDefault()
       }
     }
+    const onPaste = (e: ClipboardEvent) => {
+      if (!getState().computerOn || getState().consoleOpen) return
+      e.preventDefault()
+      getTerminal().paste(e.clipboardData?.getData('text') ?? '')
+    }
     window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    window.addEventListener('paste', onPaste)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('paste', onPaste)
+    }
   }, [])
+
+  // After the one-time reload that enables shared memory, go straight back to the computer.
+  useEffect(() => {
+    if (fontsReady && takeAutostart()) {
+      powerOnComputer()
+    }
+  }, [fontsReady])
+
+  useEffect(() => {
+    document.body.classList.toggle('computer-on', computerOn)
+    if (computerOn) focusKeyboard()
+  }, [computerOn])
 
   return (
     <>
@@ -124,6 +193,7 @@ export default function App() {
       )}
 
       <Tooltip />
+      <ComputerBar />
       <DevConsole />
     </>
   )

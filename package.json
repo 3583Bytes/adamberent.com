@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "build:basic": "bash scripts/build-basic.sh",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview"

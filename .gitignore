@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Arcade BASIC browser build (scripts/build-basic.sh)
+.arcade-basic
+.basic-out
+public/basic
+basic/bin
+basic/obj

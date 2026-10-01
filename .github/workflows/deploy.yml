@@ -23,6 +23,11 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Build Arcade BASIC for the browser
+        run: bash scripts/build-basic.sh
       - run: npm ci
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3

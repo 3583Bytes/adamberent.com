@@ -2,7 +2,8 @@ import { RoundedBox } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
-import { links } from '../content'
+import { focusKeyboard, powerOnComputer } from '../basic/session'
+import { getTerminal } from '../basic/terminal'
 import { useStore } from '../store'
 import { FONT_RETRO, FONT_SANS, useCanvasTexture } from './textures'
 import { Interactive } from './Interactive'
@@ -31,18 +32,18 @@ const BOOT: Step[] = [
 ]
 
 const LOAD: Step[] = [
-  { kind: 'type', text: 'LOAD"GAMES",8' },
+  { kind: 'type', text: 'LOAD"SNAKE",8' },
   { kind: 'print', text: '' },
   { kind: 'wait', t: 0.2 },
-  { kind: 'print', text: 'SEARCHING FOR GAMES' },
+  { kind: 'print', text: 'SEARCHING FOR SNAKE' },
   { kind: 'wait', t: 0.7 },
   { kind: 'print', text: 'LOADING' },
   { kind: 'wait', t: 0.9 },
   { kind: 'print', text: 'READY.' },
   { kind: 'type', text: 'RUN' },
   { kind: 'print', text: '' },
-  { kind: 'print', text: '20+ GAMES. 35M PLAYERS' },
-  { kind: 'print', text: 'CLICK TO PLAY.' },
+  { kind: 'print', text: 'IT REALLY RUNS BASIC.' },
+  { kind: 'print', text: 'CLICK TO POWER ON.' },
   { kind: 'print', text: '' },
   { kind: 'print', text: 'READY.' },
 ]
@@ -168,8 +169,8 @@ function useCurvedPlane(width: number, height: number, bulge: number) {
 function CrtMonitor({ screen }: { screen: VicScreen }) {
   const { canvas, ctx, texture } = useMemo(() => {
     const canvas = document.createElement('canvas')
-    canvas.width = 1024
-    canvas.height = 768
+    canvas.width = 1536
+    canvas.height = 1152
     const texture = new THREE.CanvasTexture(canvas)
     texture.colorSpace = THREE.SRGBColorSpace
     return { canvas, ctx: canvas.getContext('2d')!, texture }
@@ -178,15 +179,31 @@ function CrtMonitor({ screen }: { screen: VicScreen }) {
   const light = useRef<THREE.PointLight>(null)
   const lastCursor = useRef<boolean | null>(null)
 
+  const terminal = getTerminal()
+  const wasOn = useRef(false)
+
   useFrame((state, dt) => {
-    screen.update(Math.min(dt, 1))
-    const cursorOn = screen.typing !== null || Math.floor(state.clock.elapsedTime * 2) % 2 === 0
-    if (screen.dirty || cursorOn !== lastCursor.current) {
-      screen.draw(ctx, canvas.width, canvas.height, cursorOn)
-      texture.needsUpdate = true
-      screen.dirty = false
-      lastCursor.current = cursorOn
+    const blink = Math.floor(state.clock.elapsedTime * 2) % 2 === 0
+    const on = terminal.mode !== 'off'
+    if (on) {
+      // Powered on: the live Arcade BASIC terminal.
+      if (terminal.dirty || blink !== lastCursor.current || !wasOn.current) {
+        terminal.draw(ctx, canvas.width, canvas.height, blink, FONT_RETRO)
+        texture.needsUpdate = true
+        terminal.dirty = false
+        lastCursor.current = blink
+      }
+    } else {
+      screen.update(Math.min(dt, 1))
+      const cursorOn = screen.typing !== null || blink
+      if (screen.dirty || cursorOn !== lastCursor.current || wasOn.current) {
+        screen.draw(ctx, canvas.width, canvas.height, cursorOn)
+        texture.needsUpdate = true
+        screen.dirty = false
+        lastCursor.current = cursorOn
+      }
     }
+    wasOn.current = on
     // Subtle CRT flicker on the glow it casts.
     if (light.current) light.current.intensity = 2.2 + Math.sin(state.clock.elapsedTime * 60) * 0.05
   })
@@ -331,9 +348,12 @@ export function Computer() {
   return (
     <Interactive
       name="VIC-20"
-      title={links.games.label}
-      blurb={links.games.blurb}
-      url={links.games.url}
+      title="VIC-20"
+      blurb="Click to power on. It runs Arcade BASIC, my Full BASIC interpreter, compiled to WebAssembly."
+      onActivate={() => {
+        powerOnComputer()
+        focusKeyboard()
+      }}
       lift={0.02}
       onHoverChange={(on) => {
         if (on && !loaded.current) {

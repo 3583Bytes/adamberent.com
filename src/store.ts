@@ -21,6 +21,7 @@ type State = {
   inspected: Inspected
   spin: boolean
   boot: number
+  computerOn: boolean
   stats: Stats
 }
 
@@ -32,6 +33,7 @@ let state: State = {
   inspected: null,
   spin: false,
   boot: 0,
+  computerOn: false,
   stats: { fps: 0, calls: 0, triangles: 0, geometries: 0, textures: 0 },
 }
 

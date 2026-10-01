@@ -199,6 +199,96 @@ body,
   line-height: 1;
 }
 
+/* While zoomed in on the computer, the page chrome steps aside. */
+.hero,
+.menu,
+.console-hint {
+  transition: opacity 0.4s ease;
+}
+
+body.computer-on .hero,
+body.computer-on .menu,
+body.computer-on .console-hint {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.computer-bar {
+  position: fixed;
+  left: var(--gutter);
+  right: var(--gutter);
+  bottom: calc(var(--gutter) * 0.6);
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 24px;
+  font-family: var(--retro);
+  font-size: 1.2rem;
+  color: var(--cream-dim);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.computer-bar.is-on {
+  opacity: 1;
+  pointer-events: auto;
+  transition-delay: 0.5s;
+}
+
+.computer-hint b {
+  color: var(--accent);
+  font-weight: normal;
+}
+
+.computer-off {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--cream);
+  cursor: pointer;
+}
+
+.computer-off .kbd {
+  min-width: 40px;
+  font-size: 1rem;
+}
+
+.computer-off:hover,
+.computer-off:focus-visible {
+  color: var(--accent);
+  outline: none;
+}
+
+.computer-rotate {
+  display: none;
+}
+
+@media (orientation: portrait) and (max-width: 640px) {
+  .computer-rotate {
+    display: inline;
+  }
+}
+
+/* Off-screen but focusable, so phones show their keyboard. */
+.computer-input {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  font-size: 16px;
+  border: 0;
+  padding: 0;
+}
+
 /* Tooltip */
 .tooltip {
   position: fixed;
